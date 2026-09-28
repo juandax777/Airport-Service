@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Python quality and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: pip install '.[dev]'
+      - name: Lint
+        run: ruff check services
+      - name: Unit tests and coverage
+        run: pytest --cov-report=term-missing --cov-report=xml
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: ignore
+
+  containers:
+    name: Build and scan ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - airport_service
+          - itinerary_service
+          - notification_service
+          - web_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        run: docker build -t "${{ matrix.service }}:ci" "services/${{ matrix.service }}"
+      - name: Scan critical vulnerabilities
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: "${{ matrix.service }}:ci"
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL

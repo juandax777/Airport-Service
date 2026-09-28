@@ -1,0 +1,15 @@
+name: Security scans
+on:
+  workflow_dispatch:
+  schedule: [{ cron: '0 8 * * 1' }]
+jobs:
+  zap-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up -d --build
+      - name: OWASP ZAP API scan
+        run: docker run --network host -t ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py -t http://localhost:8001/openapi.json -f openapi -r zap-report.html
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: zap-report, path: zap-report.html }

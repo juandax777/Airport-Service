@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block page_id %}detail{% endblock %}
+{% block content %}
+<a class="back-link" href="/itineraries">← Volver a itinerarios</a>
+<section id="detail-content" class="detail-shell" aria-live="polite"><div class="panel empty-state"><span class="loader"></span><p>Cargando itinerario…</p></div></section>
+<dialog id="delete-dialog"><h2>¿Eliminar este itinerario?</h2><p>Esta acción no se puede deshacer.</p><div class="form-actions"><button class="button button-secondary" data-close>Cancelar</button><button class="button button-danger" id="confirm-delete">Eliminar</button></div></dialog>
+{% endblock %}

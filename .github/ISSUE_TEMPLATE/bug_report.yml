@@ -1,0 +1,41 @@
+name: Reporte de error
+description: Registra un comportamiento incorrecto y cómo reproducirlo.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción
+      description: ¿Qué ocurrió y qué esperabas?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      placeholder: "1. Iniciar...\n2. Enviar...\n3. Observar..."
+    validations:
+      required: true
+  - type: input
+    id: service
+    attributes:
+      label: Servicio o componente
+      placeholder: airport-service, itinerary-service, notification-service o web-app
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs o evidencia
+      description: Elimina tokens, contraseñas y datos sensibles antes de pegarlos.
+      render: shell
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Entorno
+      options:
+        - Python local
+        - Docker Compose
+        - GitHub Actions
+        - AWS
+    validations:
+      required: true

@@ -1,0 +1,29 @@
+name: Solicitud de funcionalidad
+description: Propone una mejora relacionada con requisitos o historias de usuario.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Necesidad
+      description: Describe el problema o resultado esperado.
+    validations:
+      required: true
+  - type: input
+    id: traceability
+    attributes:
+      label: Requisito o historia relacionada
+      placeholder: RF-00, HU-00 o historia Jira
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Propuesta
+      description: Explica el comportamiento deseado sin imponer una implementación si no es necesario.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criterios de aceptación
+      placeholder: "- Dado... cuando... entonces..."

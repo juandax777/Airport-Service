@@ -1,0 +1,31 @@
+asyncapi: 3.0.0
+info:
+  title: Itinerary events
+  version: 1.0.0
+channels:
+  itinerary.created:
+    address: itinerary.created
+    messages:
+      itineraryCreated:
+        $ref: '#/components/messages/ItineraryCreated'
+operations:
+  publishItineraryCreated:
+    action: send
+    channel: { $ref: '#/channels/itinerary.created' }
+  consumeItineraryCreated:
+    action: receive
+    channel: { $ref: '#/channels/itinerary.created' }
+components:
+  messages:
+    ItineraryCreated:
+      payload:
+        type: object
+        required: [event_id, event_type, version, occurred_at, data]
+        properties:
+          event_id: { type: string, format: uuid }
+          event_type: { type: string, const: ItineraryCreatedEvent }
+          version: { type: string, const: '1.0' }
+          occurred_at: { type: string, format: date-time }
+          data:
+            type: object
+            required: [itinerary_id, user_name, departure_airport_id, arrival_airport_id, travel_date, duration_minutes]

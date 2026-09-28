@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: docker
+    directory: "/services/airport_service"
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/services/itinerary_service"
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/services/notification_service"
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/services/web_app"
+    schedule:
+      interval: weekly

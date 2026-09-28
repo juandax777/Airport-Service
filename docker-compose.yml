@@ -1,0 +1,96 @@
+name: ${COMPOSE_PROJECT_NAME:-personal-itineraries}
+
+services:
+  airport-service:
+    build: ./services/airport_service
+    environment:
+      API_COLOMBIA_BASE_URL: ${API_COLOMBIA_BASE_URL:-https://api-colombia.com/api/v1}
+      REQUEST_TIMEOUT_SECONDS: ${REQUEST_TIMEOUT_SECONDS:-5}
+    ports:
+      - "${AIRPORT_SERVICE_PORT:-8001}:8000"
+
+  itinerary-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${ITINERARY_DB_NAME:-itineraries}
+      POSTGRES_USER: ${ITINERARY_DB_USER:-itinerary}
+      POSTGRES_PASSWORD: ${ITINERARY_DB_PASSWORD:-change-me-itinerary}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - itinerary-data:/var/lib/postgresql/data
+
+  notification-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${NOTIFICATION_DB_NAME:-notifications}
+      POSTGRES_USER: ${NOTIFICATION_DB_USER:-notification}
+      POSTGRES_PASSWORD: ${NOTIFICATION_DB_PASSWORD:-change-me-notification}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - notification-data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-itineraries}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-change-me-rabbitmq}
+    ports:
+      - "${RABBITMQ_AMQP_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  itinerary-service:
+    build: ./services/itinerary_service
+    environment:
+      DATABASE_URL: postgresql+psycopg://${ITINERARY_DB_USER:-itinerary}:${ITINERARY_DB_PASSWORD:-change-me-itinerary}@itinerary-db:5432/${ITINERARY_DB_NAME:-itineraries}
+      AIRPORT_SERVICE_URL: http://airport-service:8000
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-itineraries}:${RABBITMQ_PASSWORD:-change-me-rabbitmq}@rabbitmq:5672/
+    ports:
+      - "${ITINERARY_SERVICE_PORT:-8002}:8000"
+    depends_on:
+      airport-service:
+        condition: service_started
+      itinerary-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  notification-service:
+    build: ./services/notification_service
+    environment:
+      DATABASE_URL: postgresql+psycopg://${NOTIFICATION_DB_USER:-notification}:${NOTIFICATION_DB_PASSWORD:-change-me-notification}@notification-db:5432/${NOTIFICATION_DB_NAME:-notifications}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-itineraries}:${RABBITMQ_PASSWORD:-change-me-rabbitmq}@rabbitmq:5672/
+    depends_on:
+      notification-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  web-app:
+    build: ./services/web_app
+    environment:
+      AIRPORT_SERVICE_URL: http://airport-service:8000
+      ITINERARY_SERVICE_URL: http://itinerary-service:8000
+    ports:
+      - "${WEB_APP_PORT:-8000}:8000"
+    depends_on:
+      airport-service:
+        condition: service_started
+      itinerary-service:
+        condition: service_started
+
+volumes:
+  itinerary-data:
+  notification-data:

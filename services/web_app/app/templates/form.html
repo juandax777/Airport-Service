@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block page_id %}form{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', path='/css/destination-flow.css') }}">{% endblock %}
+{% block content %}
+<a class="back-link" href="/itineraries">← Volver a itinerarios</a>
+<section class="form-layout"><div><p class="eyebrow">{{ 'Nuevo viaje' if mode == 'create' else 'Actualizar viaje' }}</p><h1>{{ 'Crear itinerario' if mode == 'create' else 'Editar itinerario' }}</h1><p>Completa los datos. Validaremos los aeropuertos antes de guardar.</p><div class="route-visual" aria-hidden="true"><span>Salida</span><i></i><b>✦</b><i></i><span>Llegada</span></div></div>
+<form id="itinerary-form" class="panel form-card" novalidate>
+  <div id="form-error" class="message message-error" hidden></div>
+  <div id="arrival-choice" class="arrival-choice" aria-live="polite" hidden><span>Llegada elegida desde el mapa</span><strong id="arrival-choice-name"></strong></div>
+  <label>Nombre del viajero<input name="user_name" required minlength="1" autocomplete="name" placeholder="Ej. Juan David"></label>
+  <div class="field-grid"><label>Aeropuerto de salida<select name="departure_airport_id" required><option value="">Selecciona una salida</option></select></label><label>Aeropuerto de llegada<select name="arrival_airport_id" required><option value="">Selecciona una llegada</option></select></label></div>
+  <div class="field-grid"><label>Fecha del viaje<input name="travel_date" type="date" required></label><label>Duración en minutos<input name="duration_minutes" type="number" min="1" required placeholder="90"></label></div>
+  <div class="form-actions"><a class="button button-secondary" href="/itineraries">Cancelar</a><button id="submit-button" class="button button-primary" type="submit">{{ 'Crear itinerario' if mode == 'create' else 'Guardar cambios' }}</button></div>
+</form></section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/js/destination-flow.js') }}" defer></script>{% endblock %}

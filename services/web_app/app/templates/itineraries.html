@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block page_id %}itineraries{% endblock %}
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">Planificación</p><h1>Mis itinerarios</h1><p>Administra todos tus viajes desde un solo lugar.</p></div><a class="button button-primary" href="/itineraries/new">Nuevo itinerario</a></section>
+<section class="panel"><div class="toolbar"><label class="sr-only" for="itinerary-search">Buscar itinerarios</label><input id="itinerary-search" class="search" type="search" placeholder="Buscar por usuario o aeropuerto…"><span id="itinerary-count" class="muted"></span></div><div id="itinerary-list" class="table-wrap" aria-live="polite"><div class="empty-state"><span class="loader"></span><p>Cargando itinerarios…</p></div></div></section>
+{% endblock %}

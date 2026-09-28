@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block page_id %}dashboard{% endblock %}
+{% block head %}<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script><link rel="stylesheet" href="{{ url_for('static', path='/css/destination-flow.css') }}">{% endblock %}
+{% block content %}
+<section class="hero">
+  <div><p class="eyebrow">Explora Colombia</p><h1>Tu próximo viaje comienza en el mapa</h1><p>Selecciona un aeropuerto y conviértelo en el destino de tu próximo itinerario.</p></div>
+  <a class="button button-primary" href="/itineraries/new">Crear itinerario <span aria-hidden="true">→</span></a>
+</section>
+<section class="dashboard-grid">
+  <article class="panel map-panel"><div class="panel-heading"><div><p class="eyebrow">Red aeroportuaria</p><h2>Aeropuertos disponibles</h2><p class="panel-hint">Toca un marcador para elegirlo como llegada.</p></div><span id="airport-count" class="badge">Cargando…</span></div><div id="airport-map" class="map" aria-label="Mapa interactivo de aeropuertos colombianos"></div><section id="selected-airport" class="airport-selection" aria-live="polite" hidden><div><span>Destino seleccionado</span><strong id="selected-airport-name"></strong><small id="selected-airport-city"></small></div><a id="plan-itinerary" class="button button-primary" href="/itineraries/new">Planear itinerario <span aria-hidden="true">→</span></a></section><div id="map-error" class="message message-error" hidden></div></article>
+  <aside class="panel"><label class="search-label" for="airport-search">Buscar aeropuerto</label><input id="airport-search" class="search" type="search" placeholder="Nombre o ciudad…"><div id="airport-list" class="airport-list" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div></div></aside>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/js/destination-flow.js') }}" defer></script><script src="{{ url_for('static', path='/js/map-coordinate-fix.js') }}" defer></script>{% endblock %}
