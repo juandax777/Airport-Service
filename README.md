@@ -12,6 +12,8 @@ docker compose up --build
 Abre `http://localhost:8000` para usar la aplicación web. Swagger queda disponible en `http://localhost:8001/docs` y `http://localhost:8002/docs`.
 
 - Ejecución completa: [`docs/MANUAL_EJECUCION.md`](docs/MANUAL_EJECUCION.md).
+- Arquitectura y diagramas editables: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+- Prueba de carga local: [`tests/load/README.md`](tests/load/README.md).
 - Publicación y organización en GitHub: [`docs/GITHUB_REPOSITORY.md`](docs/GITHUB_REPOSITORY.md).
 - Reglas de colaboración: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
@@ -32,7 +34,7 @@ Los identificadores, prioridades, niveles y criterios de aceptación de esos doc
 - Crear, consultar, actualizar y eliminar itinerarios.
 - Validar salida y llegada antes de persistir un itinerario.
 - Publicar y procesar `ItineraryCreatedEvent` de forma asíncrona.
-- Ejecutar notificaciones con un modelo Serverless simulado localmente.
+- Procesar eventos y registrar notificaciones con un consumidor local en contenedor; el despliegue FaaS en AWS aún no está implementado.
 
 ## Alcance por nivel
 
@@ -42,7 +44,7 @@ Los identificadores, prioridades, niveles y criterios de aceptación de esos doc
 - Arquitectura hexagonal, DDD básico y patrón Adapter.
 - Consulta de aeropuertos y transformación para Plotly JS.
 - CRUD completo de itinerarios con validación mediante HTTP.
-- Base de datos relacional independiente por servicio y migraciones versionadas.
+- Base de datos relacional independiente por servicio. Hay scripts SQL de migración versionados, pero aún no se ejecutan automáticamente.
 - Logs JSON con identificadores de correlación.
 - Swagger, frontend básico, Docker y Docker Compose.
 - Cobertura unitaria mínima del 70 %.

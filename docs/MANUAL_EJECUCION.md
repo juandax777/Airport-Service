@@ -52,6 +52,15 @@ docker compose ps
 
 Los servicios esperados son `web-app`, `airport-service`, `itinerary-service`, `notification-service`, `itinerary-db`, `notification-db` y `rabbitmq`.
 
+RabbitMQ y PostgreSQL ya se ejecutan como contenedores de este proyecto. No necesitas iniciar por separado el servicio RabbitMQ de Windows ni instalar/configurar bases PostgreSQL locales. Compose espera a que RabbitMQ acepte conexiones AMQP antes de iniciar Notification Service.
+
+Si `notification-service` aparece detenido después de iniciar el proyecto, revisa los logs y vuelve a iniciarlo cuando las dependencias estén saludables:
+
+```powershell
+docker compose logs notification-service rabbitmq
+docker compose up -d notification-service
+```
+
 ## 3. Direcciones locales
 
 | Componente | Dirección | Uso |
@@ -174,11 +183,11 @@ Para ejecutar pruebas fuera de Docker necesitas instalar dependencias de desarro
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e '.[dev]'
-pytest
+python -m pytest --cov-report=xml
 ruff check services
 ```
 
-La integración continua en GitHub ejecuta pytest, Ruff, build de imágenes y Trivy. OWASP ZAP se ejecuta manualmente o por programación desde el workflow de seguridad.
+La integración continua en GitHub ejecuta pytest, Ruff, build de imágenes y Trivy. La captura de la ejecución local de las pruebas unitarias está en [Evidencia de pruebas](evidence/unit-tests-2026-10-09.png). OWASP ZAP se ejecuta manualmente o por programación desde el workflow de seguridad.
 
 ## 9. Problemas frecuentes
 

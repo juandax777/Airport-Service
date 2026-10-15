@@ -1,0 +1,7 @@
+{
+  "status": "idle",
+  "current_task": null,
+  "active_agents": [],
+  "last_updated": null,
+  "notes": "Estado inicial. Actualizar solo durante una tarea de orquestación activa."
+}

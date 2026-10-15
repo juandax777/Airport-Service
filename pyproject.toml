@@ -38,7 +38,7 @@ pythonpath = [
   "services/itinerary_service",
   "services/notification_service",
 ]
-addopts = "--cov=services --cov-report=term-missing --cov-fail-under=70"
+addopts = "--import-mode=importlib --cov=services --cov-report=term-missing --cov-fail-under=70"
 
 [tool.ruff]
 line-length = 100

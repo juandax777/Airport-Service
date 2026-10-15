@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram id="data_model" name="Modelo de datos y evento">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="data_title" value="Modelo de datos por servicio y evento de integración" style="text;html=1;align=left;verticalAlign=middle;fontSize=24;fontColor=#17324D;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="18" width="1500" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="data_subtitle" value="Cada servicio conserva sus tablas; la relación entre itinerario y notificación viaja por el evento, no por una FK entre bases." style="text;html=1;align=left;verticalAlign=middle;fontSize=13;fontColor=#52616B;" vertex="1" parent="1">
+          <mxGeometry x="43" y="60" width="1800" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="data_itinerary_db" value="Base propia · itinerary-db · PostgreSQL 16" style="rounded=1;whiteSpace=wrap;html=1;container=1;pointerEvents=0;verticalAlign=top;spacingTop=12;fontSize=16;fontStyle=1;fontColor=#17324D;fillColor=#F7FBF7;strokeColor=#82B366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="35" y="125" width="590" height="530" as="geometry" />
+        </mxCell>
+        <mxCell id="data_contract_box" value="Contrato AsyncAPI · ItineraryCreatedEvent v1.0" style="rounded=1;whiteSpace=wrap;html=1;container=1;pointerEvents=0;verticalAlign=top;spacingTop=12;fontSize=16;fontStyle=1;fontColor=#17324D;fillColor=#FFFCF2;strokeColor=#D6B656;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="690" y="125" width="500" height="530" as="geometry" />
+        </mxCell>
+        <mxCell id="data_notification_db" value="Base propia · notification-db · PostgreSQL 16" style="rounded=1;whiteSpace=wrap;html=1;container=1;pointerEvents=0;verticalAlign=top;spacingTop=12;fontSize=16;fontStyle=1;fontColor=#17324D;fillColor=#F7FBF7;strokeColor=#82B366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1255" y="125" width="610" height="530" as="geometry" />
+        </mxCell>
+        <mxCell id="data_table_itineraries" value="itineraries" style="shape=table;startSize=34;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=1;fontStyle=1;html=1;whiteSpace=wrap;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#17324D;fontSize=13;" vertex="1" parent="data_itinerary_db">
+          <mxGeometry x="30" y="105" width="525" height="282" as="geometry" />
+        </mxCell>
+        <mxCell id="data_itin_row_id" value="&lt;b&gt;PK&lt;/b&gt; id : VARCHAR(36)" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="data_table_itineraries">
+          <mxGeometry x="0" y="34" width="525" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="data_itin_row_user" value="user_name : VARCHAR(255) NOT NULL" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="data_table_itineraries">
+          <mxGeometry x="0" y="72" width="525" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="data_itin_row_departure" value="departure_airport_id : VARCHAR(255) NOT NULL" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="data_table_itineraries">
+          <mxGeometry x="0" y="110" width="525" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="data_itin_row_arrival" value="arrival_airport_id : VARCHAR(255) NOT NULL" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="data_table_itineraries">
+          <mxGeometry x="0" y="148" width="525" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="data_itin_row_date" value="travel_date : DATE NOT NULL" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="data_table_itineraries">
+          <mxGeometry x="0" y="186" width="525" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="data_itin_row_duration" value="duration_minutes : INTEGER NOT NULL · CHECK &amp;gt; 0" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="data_table_itineraries">
+          <mxGeometry x="0" y="224" width="525" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="data_event_payload" value="&lt;b&gt;Payload&lt;/b&gt;&lt;br&gt;event_id : UUID&lt;br&gt;event_type : ItineraryCreatedEvent&lt;br&gt;version : 1.0&lt;br&gt;occurred_at : date-time&lt;br&gt;&lt;b&gt;data.itinerary_id : UUID&lt;/b&gt;&lt;br&gt;data.user_name : string&lt;br&gt;data.departure_airport_id : string&lt;br&gt;data.arrival_airport_id : string&lt;br&gt;data.travel_date : date&lt;br&gt;data.duration_minutes : integer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#263238;fontSize=13;spacing=8;fontSize=12;align=left;spacing=12;" vertex="1" parent="data_contract_box">
+          <mxGeometry x="30" y="80" width="440" height="385" as="geometry" />
+        </mxCell>
+        <mxCell id="data_table_notifications" value="notifications" style="shape=table;startSize=34;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=1;fontStyle=1;html=1;whiteSpace=wrap;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#17324D;fontSize=13;" vertex="1" parent="data_notification_db">
+          <mxGeometry x="38" y="105" width="530" height="168" as="geometry" />
+        </mxCell>
+        <mxCell id="data_notif_row_event_id" value="&lt;b&gt;PK&lt;/b&gt; event_id : VARCHAR(36)" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="data_table_notifications">
+          <mxGeometry x="0" y="34" width="530" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="data_notif_row_itinerary_id" value="itinerary_id : VARCHAR(36) NOT NULL" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="data_table_notifications">
+          <mxGeometry x="0" y="72" width="530" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="data_notif_row_status" value="status : VARCHAR(64) NOT NULL" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="data_table_notifications">
+          <mxGeometry x="0" y="110" width="530" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="data_itinerary_source" value="Esquema desplegado: modelos SQLAlchemy de Itinerary Service" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontColor=#52616B;" vertex="1" parent="data_itinerary_db">
+          <mxGeometry x="28" y="430" width="535" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="data_notification_behavior" value="event_id es clave primaria y permite ignorar entregas repetidas; status registra el procesamiento simulado." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontColor=#263238;fontSize=13;spacing=8;fontSize=11;align=left;spacing=8;" vertex="1" parent="data_notification_db">
+          <mxGeometry x="30" y="340" width="550" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="data_notification_source" value="Esquema desplegado: modelos SQLAlchemy de Notification Service" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontColor=#52616B;" vertex="1" parent="data_notification_db">
+          <mxGeometry x="30" y="430" width="550" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="data_e_itinerary_to_event" value="id → data.itinerary_id" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#D6B656;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="data_table_itineraries" target="data_event_payload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="data_e_event_to_notification" value="el consumidor guarda la referencia" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#D6B656;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="data_event_payload" target="data_table_notifications">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="data_no_fk_note" value="No hay una llave foránea entre estas bases: notification.itinerary_id es una referencia recibida en el evento.&lt;br&gt;Las migraciones SQL no se ejecutan al arrancar; el runtime crea las tablas desde los modelos SQLAlchemy." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=center;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="730" width="1300" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="data_contract_source" value="Contrato: contracts/asyncapi.yaml · tablas: migraciones iniciales de cada servicio." style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#52616B;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="850" width="1300" height="38" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

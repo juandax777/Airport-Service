@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Planificador personal de itinerarios y aeropuertos colombianos">
   <title>{{ title }} · Vuela</title>
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}?v=20261009-2">
   {% block head %}{% endblock %}
 </head>
 <body data-page="{% block page_id %}{% endblock %}" data-item-id="{{ item_id | default('') }}" data-mode="{{ mode | default('') }}">
@@ -20,7 +20,7 @@
   </header>
   <main id="contenido" class="page-shell">{% block content %}{% endblock %}</main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
+  <script src="{{ url_for('static', path='/js/app.js') }}?v=20261009-2" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -17,7 +17,7 @@ Describe qué cambia y por qué.
 ## Validación
 
 - [ ] Ejecuté `ruff check services`.
-- [ ] Ejecuté `pytest` y se mantiene al menos 70 % de cobertura.
+- [ ] Ejecuté `python -m pytest --cov-report=xml` y se mantiene al menos 70 % de cobertura.
 - [ ] Verifiqué `docker compose config --quiet`.
 - [ ] Construí o probé los servicios afectados.
 - [ ] Actualicé OpenAPI, AsyncAPI o documentación si aplica.

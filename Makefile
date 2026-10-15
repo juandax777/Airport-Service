@@ -12,7 +12,7 @@ down:
 	docker compose down
 
 clean:
-	docker compose down --volumes
+	docker compose down
 
 test:
 	$(PYTHON) -m pytest

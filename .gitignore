@@ -80,3 +80,10 @@ temp/
 *.tmp
 *.bak
 *.orig
+
+# Archify visual review and intermediate export artifacts. Keep the diagram
+# sources (candidate.json) and HTML diagrams linked from the documentation.
+.archify/**/*.visual-check.*
+.archify/**/*.finalize*.json
+.archify/**/*.delivery.json
+.archify/**/*.browser-check.json

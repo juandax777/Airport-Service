@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram id="itinerary_event_flow" name="Flujo de creación y notificación">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="event_title" value="Flujo de creación de itinerario y notificación" style="text;html=1;align=left;verticalAlign=middle;fontSize=24;fontColor=#17324D;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="18" width="1300" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="event_subtitle" value="HTTP síncrono para validar y persistir; RabbitMQ entrega el evento al consumidor." style="text;html=1;align=left;verticalAlign=middle;fontSize=13;fontColor=#52616B;" vertex="1" parent="1">
+          <mxGeometry x="103" y="60" width="1390" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_browser" value="&lt;b&gt;Navegador · usuario&lt;/b&gt;&lt;br&gt;Envía la solicitud de creación desde la interfaz web." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="125" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_web" value="&lt;b&gt;Web App · routes / proxy&lt;/b&gt;&lt;br&gt;Recibe la solicitud y la reenvía por HTTP a Itinerary Service." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="293" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_itinerary_api" value="&lt;b&gt;Itinerary Service · API y caso de uso&lt;/b&gt;&lt;br&gt;POST /api/v1/itineraries · valida, crea Itinerary y coordina los puertos." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="461" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_airport" value="&lt;b&gt;Airport Service · validación HTTP&lt;/b&gt;&lt;br&gt;Comprueba aeropuertos de salida y llegada; devuelve éxito o error." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="629" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_save" value="&lt;b&gt;Itinerary Service · adaptador SQL&lt;/b&gt;&lt;br&gt;Tras validar, guarda el itinerario mediante ItineraryRepository." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="797" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_itinerary_db" value="&lt;b&gt;itinerary-db · PostgreSQL 16&lt;/b&gt;&lt;br&gt;Persiste la fila itineraries y confirma la escritura." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="965" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_publish" value="&lt;b&gt;Itinerary Service · RabbitMQ publisher&lt;/b&gt;&lt;br&gt;Después de guardar, publica ItineraryCreatedEvent con routing key itinerary.created." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="1133" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_rabbit" value="&lt;b&gt;RabbitMQ · exchange y cola&lt;/b&gt;&lt;br&gt;Exchange itineraries (topic) enruta itinerary.created a la cola notifications." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="1301" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_consumer" value="&lt;b&gt;Notification Service · consumidor&lt;/b&gt;&lt;br&gt;Lee el evento, evita duplicados por event_id y procesa data.itinerary_id." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="1469" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_notification_db" value="&lt;b&gt;notification-db · PostgreSQL 16&lt;/b&gt;&lt;br&gt;Guarda la notificación simulada y la referencia al itinerario." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#263238;fontSize=13;spacing=8;fontSize=14;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="295" y="1637" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_edge_1" value="POST /ui-api" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#607D8B;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="flow_browser" target="flow_web">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_edge_2" value="HTTP POST" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#607D8B;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="flow_web" target="flow_itinerary_api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_edge_3" value="HTTP validate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#607D8B;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="flow_itinerary_api" target="flow_airport">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_edge_4" value="200 OK → continúa" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#607D8B;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="flow_airport" target="flow_save">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_edge_5" value="INSERT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#607D8B;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="flow_save" target="flow_itinerary_db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_edge_6" value="guardado → publicar" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#607D8B;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="flow_itinerary_db" target="flow_publish">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_edge_7" value="AMQP publish" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#607D8B;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="flow_publish" target="flow_rabbit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_edge_8" value="entrega de cola" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#607D8B;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="flow_rabbit" target="flow_consumer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_edge_9" value="INSERT / deduplicación" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#607D8B;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="flow_consumer" target="flow_notification_db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_payload_note" value="&lt;b&gt;Payload de AsyncAPI&lt;/b&gt;&lt;br&gt;event_id · event_type · version · occurred_at&lt;br&gt;&lt;b&gt;data.itinerary_id&lt;/b&gt; · user_name&lt;br&gt;departure_airport_id · arrival_airport_id&lt;br&gt;travel_date · duration_minutes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#263238;fontSize=13;spacing=8;fontSize=12;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="1150" width="335" height="215" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_outbox_note" value="Persistir y publicar son pasos separados; el flujo actual no usa Outbox transaccional." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#263238;fontSize=13;spacing=8;fontSize=12;align=left;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="1395" width="335" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_contract_source" value="Campo alineado con contracts/asyncapi.yaml: data.itinerary_id." style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#52616B;align=center;" vertex="1" parent="1">
+          <mxGeometry x="165" y="1795" width="1265" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_payload_link" value="payload" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#D6B656;fontColor=#263238;fontSize=11;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="flow_publish" target="flow_payload_note">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -65,6 +65,16 @@ Para un equipo de tres, usa una revisión cruzada: el propietario del servicio d
 
 La ejecución local usa `.env`. GitHub Actions no debe recibir ese archivo. Para la publicación opcional en AWS configura:
 
+### SonarQube opcional
+
+El análisis de SonarQube es opcional para que los PR y el CI normal funcionen sin una cuenta configurada. Para habilitarlo en **Settings → Secrets and variables → Actions**:
+
+- Variable `SONARQUBE_ENABLED`: `true`.
+- Variable `SONAR_HOST_URL`: URL accesible desde GitHub Actions; para SonarQube Cloud usa `https://sonarcloud.io`.
+- Secreto `SONAR_TOKEN`: token del proyecto con permiso para analizarlo.
+
+Si la variable de activación no es `true`, o falta la URL o el token, el paso de análisis se omite. El proyecto de SonarQube debe existir y usar la clave declarada en `sonar-project.properties`. Para SonarQube Cloud, configura también `sonar.organization` en ese archivo con la clave de la organización.
+
 ### Variables del repositorio
 
 - `AWS_DEPLOY_ENABLED`: `true` únicamente cuando se habilite la publicación.

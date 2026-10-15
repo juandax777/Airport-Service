@@ -29,3 +29,10 @@ components:
           data:
             type: object
             required: [itinerary_id, user_name, departure_airport_id, arrival_airport_id, travel_date, duration_minutes]
+            properties:
+              itinerary_id: { type: string, format: uuid }
+              user_name: { type: string, minLength: 1 }
+              departure_airport_id: { type: string }
+              arrival_airport_id: { type: string }
+              travel_date: { type: string, format: date }
+              duration_minutes: { type: integer, minimum: 1 }

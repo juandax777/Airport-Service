@@ -24,7 +24,7 @@ Consulta [`docs/MANUAL_EJECUCION.md`](docs/MANUAL_EJECUCION.md) para ejecutar to
 
 ```powershell
 ruff check services
-pytest
+python -m pytest --cov-report=xml
 docker compose config --quiet
 docker compose build
 ```

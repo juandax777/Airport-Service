@@ -9,8 +9,8 @@
   <div id="arrival-choice" class="arrival-choice" aria-live="polite" hidden><span>Llegada elegida desde el mapa</span><strong id="arrival-choice-name"></strong></div>
   <label>Nombre del viajero<input name="user_name" required minlength="1" autocomplete="name" placeholder="Ej. Juan David"></label>
   <div class="field-grid"><label>Aeropuerto de salida<select name="departure_airport_id" required><option value="">Selecciona una salida</option></select></label><label>Aeropuerto de llegada<select name="arrival_airport_id" required><option value="">Selecciona una llegada</option></select></label></div>
-  <div class="field-grid"><label>Fecha del viaje<input name="travel_date" type="date" required></label><label>Duración en minutos<input name="duration_minutes" type="number" min="1" required placeholder="90"></label></div>
+  <div class="field-grid"><label>Fecha del viaje<input name="travel_date" type="date" required></label><label>Duración estimada (minutos)<input name="duration_minutes" type="number" min="1" required readonly placeholder="Selecciona la ruta" aria-describedby="duration-estimate-help"><small id="duration-estimate-help" class="field-help" aria-live="polite">Selecciona los aeropuertos para calcular el tiempo aproximado del vuelo.</small></label></div>
   <div class="form-actions"><a class="button button-secondary" href="/itineraries">Cancelar</a><button id="submit-button" class="button button-primary" type="submit">{{ 'Crear itinerario' if mode == 'create' else 'Guardar cambios' }}</button></div>
 </form></section>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', path='/js/destination-flow.js') }}" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/js/destination-flow.js') }}?v=20261009-2" defer></script>{% endblock %}

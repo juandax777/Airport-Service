@@ -82,6 +82,7 @@
           if (!select?.querySelector(`option[value="${CSS.escape(arrivalId)}"]`)) return;
           clearInterval(timer);
           select.value = arrivalId;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
           const notice = document.querySelector("#arrival-choice");
           document.querySelector("#arrival-choice-name").textContent =
             `${airport.name} — ${airport.city || "Sin ciudad"}`;
