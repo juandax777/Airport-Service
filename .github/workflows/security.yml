@@ -10,6 +10,6 @@ jobs:
       - run: docker compose up -d --build
       - name: OWASP ZAP API scan
         run: docker run --network host -t ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py -t http://localhost:8001/openapi.json -f openapi -r zap-report.html
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with: { name: zap-report, path: zap-report.html }
