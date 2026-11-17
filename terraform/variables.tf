@@ -85,6 +85,7 @@ variable "compute" {
     hostname             = string
     certificate_arn      = string
     hosted_zone_id       = optional(string)
+    allowed_web_cidrs    = set(string)
     itinerary_db_secret  = string
     rabbitmq_url_secret  = string
     secrets_kms_key_arns = optional(set(string), [])
@@ -111,6 +112,17 @@ variable "compute" {
       false
     )
     error_message = "desired_count debe ser un entero no negativo."
+  }
+
+  validation {
+    condition = var.compute == null || try(
+      length(var.compute.allowed_web_cidrs) > 0 && alltrue([
+        for cidr in var.compute.allowed_web_cidrs :
+        can(cidrnetmask(cidr)) && tonumber(split("/", cidr)[1]) > 0 && cidrhost(cidr, 0) == split("/", cidr)[0]
+      ]),
+      false
+    )
+    error_message = "Indica uno o más CIDR IPv4 canónicos del equipo, por ejemplo una IP pública con /32. No se permite un prefijo /0."
   }
 }
 

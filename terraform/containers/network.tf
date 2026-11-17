@@ -14,14 +14,17 @@ resource "aws_security_group" "component" {
   vpc_id = var.vpc_id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "public_web" {
-  for_each = toset(["80", "443"])
+resource "aws_vpc_security_group_ingress_rule" "team_web" {
+  for_each = {
+    for pair in setproduct(var.config.allowed_web_cidrs, [80, 443]) :
+    "${pair[0]}:${pair[1]}" => { cidr = pair[0], port = pair[1] }
+  }
 
   security_group_id = aws_security_group.component["alb"].id
-  cidr_ipv4         = "0.0.0.0/0"
+  cidr_ipv4         = each.value.cidr
   ip_protocol      = "tcp"
-  from_port        = tonumber(each.key)
-  to_port          = tonumber(each.key)
+  from_port        = each.value.port
+  to_port          = each.value.port
 }
 
 resource "aws_vpc_security_group_ingress_rule" "app" {

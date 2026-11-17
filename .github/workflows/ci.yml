@@ -63,7 +63,7 @@ jobs:
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
 
   containers:
-    name: Build and scan ${{ matrix.service }}
+    name: Build and scan ${{ matrix.service }} (${{ matrix.variant }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -73,16 +73,58 @@ jobs:
           - itinerary_service
           - notification_service
           - web_app
+        variant: [local]
+        include:
+          - service: itinerary_service
+            variant: aws
+          - service: notification_service
+            variant: lambda
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - name: Build image
-        run: docker build -t "${{ matrix.service }}:ci" "services/${{ matrix.service }}"
+        env:
+          SERVICE: ${{ matrix.service }}
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          context="services/$SERVICE"
+          image="$SERVICE:ci-$VARIANT"
+          case "$VARIANT" in
+            aws)
+              docker build --platform linux/amd64 --build-arg INCLUDE_RDS_CA=true -t "$image" "$context"
+              ;;
+            lambda)
+              docker buildx build --load --platform linux/amd64 --provenance=false \
+                -f "$context/Dockerfile.lambda" -t "$image" "$context"
+              ;;
+            local)
+              docker build -t "$image" "$context"
+              ;;
+          esac
       - name: Scan critical vulnerabilities
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: "${{ matrix.service }}:ci"
+          image-ref: "${{ matrix.service }}:ci-${{ matrix.variant }}"
           format: table
           exit-code: "1"
           ignore-unfixed: true
           severity: CRITICAL
+  terraform:
+    name: Validate Terraform (${{ matrix.root }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        root: [terraform, terraform/bootstrap]
+    defaults:
+      run:
+        working-directory: ${{ matrix.root }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.5
+          terraform_wrapper: false
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate

@@ -181,7 +181,7 @@ class FakeConnection:
     async def __aexit__(self, *_):
         self.closed = True
 
-    async def channel(self):
+    async def channel(self, *, on_return_raises: bool = False):
         return self.channel_instance
 
 

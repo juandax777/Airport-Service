@@ -1,5 +1,7 @@
 # Infraestructura AWS
 
+Para el primer entorno, sigue la [guía de despliegue de `dev`](DEPLOY_DEV.md). Incluye una alternativa con EC2 y Docker Compose para demostraciones.
+
 La raíz declara cuatro repositorios ECR con escaneo al publicar. Se conservan los nombres y las direcciones Terraform de Airport, Itinerary y Notification. Web App tiene su propio repositorio. Las declaraciones no acreditan que los repositorios existan en AWS. La fase 2 declara el backend S3, su bootstrap y un módulo de red optativo. La fase 3 agrega RDS y Amazon MQ privados y un flujo de aprovisionamiento y migración desde un ejecutor privado. La fase 4 declara ECS Fargate, comunicación privada y entrada HTTPS. La fase 5 declara Lambda con consumo de Amazon MQ y alarmas de notificaciones.
 
 Docker Compose sigue siendo el entorno local. Allí Web App consume Airport e Itinerary, Itinerary valida aeropuertos y publica a RabbitMQ, y el consumidor en contenedor registra las notificaciones en su propia base. Cada servicio persistente tiene una migración SQL inicial versionada. El arranque de la aplicación y el flujo de migraciones deberán revisarse juntos antes del despliegue.

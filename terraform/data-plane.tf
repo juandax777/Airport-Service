@@ -30,6 +30,16 @@ resource "aws_security_group" "data_client" {
   vpc_id = module.network["primary"].vpc_id
 }
 
+resource "aws_vpc_security_group_egress_rule" "operations_https" {
+  count = local.data_enabled ? 1 : 0
+
+  security_group_id = aws_security_group.data_client["operations"].id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol      = "tcp"
+  from_port        = 443
+  to_port          = 443
+}
+
 resource "aws_security_group" "database" {
   for_each = local.db_instances
 

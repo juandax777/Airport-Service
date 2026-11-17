@@ -2,6 +2,8 @@
 
 Esta fase declara tres servicios en subredes privadas, con imágenes Linux x86-64 de ECR fijadas por digest. Web App recibe peticiones desde el ALB y llama a `airport-service:8000` e `itinerary-service:8000` mediante Service Connect. Itinerary también llama a Airport por esa red. Solo Airport consulta API Colombia. El ALB publica el puerto 443 y redirige el 80 al dominio configurado. Su destino único es Web App, con comprobación HTTP en `/health/live`.
 
+Configura `compute.allowed_web_cidrs` con las IPv4 públicas del equipo, preferiblemente una entrada `/32` por IP. El balanceador limita los puertos 80 y 443 a esas redes. El CRUD es compartido entre quienes tengan acceso, así que usa datos ficticios en `dev`.
+
 ## Preparar un despliegue autorizado
 
 1. Habilita primero backend, ECR, red y servicios de datos. Completa el [aprovisionamiento y las migraciones](../operations/README.md) desde un ejecutor privado antes de habilitar ECS.
