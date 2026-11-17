@@ -1,6 +1,6 @@
 # Infraestructura AWS
 
-La raíz declara cuatro repositorios ECR con escaneo al publicar. Se conservan los nombres y las direcciones Terraform de Airport, Itinerary y Notification. Web App tiene su propio repositorio. Las declaraciones no acreditan que los repositorios existan en AWS. La fase 2 declara el backend S3, su bootstrap y un módulo de red optativo. La fase 3 agrega RDS y Amazon MQ privados y un flujo de aprovisionamiento y migración desde un ejecutor privado. Cómputo, notificaciones y monitoreo siguen pendientes.
+La raíz declara cuatro repositorios ECR con escaneo al publicar. Se conservan los nombres y las direcciones Terraform de Airport, Itinerary y Notification. Web App tiene su propio repositorio. Las declaraciones no acreditan que los repositorios existan en AWS. La fase 2 declara el backend S3, su bootstrap y un módulo de red optativo. La fase 3 agrega RDS y Amazon MQ privados y un flujo de aprovisionamiento y migración desde un ejecutor privado. La fase 4 declara ECS Fargate, comunicación privada y entrada HTTPS. Lambda y las alarmas operativas siguen pendientes.
 
 Docker Compose sigue siendo el entorno local. Allí Web App consume Airport e Itinerary, Itinerary valida aeropuertos y publica a RabbitMQ, y el consumidor en contenedor registra las notificaciones en su propia base. Cada servicio persistente tiene una migración SQL inicial versionada. El arranque de la aplicación y el flujo de migraciones deberán revisarse juntos antes del despliegue.
 
@@ -31,6 +31,10 @@ El grupo de seguridad por defecto se declara sin reglas. Cada módulo de carga n
 
 Activa los objetos database y messaging del ejemplo después de configurar network. El broker de evaluación es RabbitMQ 4.3 en mq.m7g.medium. Para un clúster, configura tres zonas y selecciona una clase admitida para clúster. Usa la [guía de operaciones](operations/README.md) para crear bases y usuarios, aplicar SQL versionado y preparar la topología RabbitMQ.
 
+## ECS y entrada HTTPS
+
+El objeto compute habilita el clúster y el balanceador por entorno. Usa la [guía de ECS](containers/README.md) para preparar imágenes por digest, secretos y DNS. El ALB registra solo Web App e Itinerary conserva el acceso privado a PostgreSQL y Amazon MQ.
+
 ## Eventos y recuperación
 
 Conservar el exchange `itineraries`, la clave `itinerary.created` y la cola `notifications`. Crear identidades separadas para bootstrap, publicación y consumo. Revisar qué declaraciones de topología hace hoy el código antes de retirar permisos de configuración. Preservar `ItineraryCreatedEvent` v1.0 con `data.itinerary_id`. El lector acepta `data.id` para mensajes antiguos. Lambda lee `rmqMessagesByQueue`, decodifica cada `data` de Base64 y valida el JSON de negocio. Mantener el adaptador de Compose y compartir la lógica de persistencia. Usar una restricción única con inserción atómica por `event_id`, y acordar cómo deduplicar cualquier mensaje histórico sin ese campo antes de habilitar el mapping. Nunca ejecutar los dos consumidores sobre la misma cola durante la transición. [Formato y entrega de Amazon MQ a Lambda](https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html).
@@ -45,13 +49,13 @@ USD bajo demanda en us-east-1, 730 horas al mes, sin créditos ni impuestos. El 
 
 | Componente | Supuesto | USD/mes |
 |---|---|---:|
-| ECS Fargate x86 | 3 tareas, 0.25 vCPU y 0.5 GB por tarea, a USD 0.04048/vCPU-h y 0.004445/GB-h | 27.03 |
+| ECS Fargate x86 | 3 tareas, 0.5 vCPU y 1 GB por tarea, incluida la capacidad para Service Connect, a USD 0.04048/vCPU-h y 0.004445/GB-h | 54.06 |
 | ALB | USD 0.0225/h más uso de LCU a USD 0.008/LCU-h | 16.43 + uso |
 | NAT zonal e IPv4 públicas | 1 NAT a 0.045/h y 3 IPv4 a 0.005/h cada una, incluidas 2 del ALB | 43.80 + tráfico |
 | MQ de referencia | Un mq.m7g.large a 0.2734/h y 15 GiB a 0.10/GiB-mes, extrapolando la tarifa por nodo del ejemplo AWS | 201.08 |
 | MQ de alta disponibilidad | Tres nodos mq.m7g.large y 45 GiB en total a las mismas tarifas | 603.25 |
 
-El subtotal de ECS, ALB y NAT/IPv4 es aproximadamente USD 87.26/mes. Con el broker de referencia asciende a USD 288.34/mes antes de RDS y costos variables. AWS retiró mq.t3.micro para brokers RabbitMQ nuevos. Cotizar mq.m7g.medium de un nodo para evaluación antes de elegir clase. Completar la cotización con RDS PostgreSQL Single-AZ db.t4g.micro y 20 GiB gp3, ECR, Lambda, CloudWatch, Secrets Manager, S3, DNS, transferencia entre AZ y endpoints si se usan. Esas partidas no cuentan en el subtotal. Si el broker supera el presupuesto de desarrollo, mantener el flujo asíncrono de desarrollo en Compose y usar AWS para ventanas de integración presupuestadas.
+El subtotal de ECS, ALB y NAT/IPv4 es aproximadamente USD 114.29/mes. Con el broker de referencia asciende a USD 315.37/mes antes de RDS y costos variables. AWS retiró mq.t3.micro para brokers RabbitMQ nuevos. Cotizar mq.m7g.medium de un nodo para evaluación antes de elegir clase. Completar la cotización con RDS PostgreSQL Single-AZ db.t4g.micro y 20 GiB gp3, ECR, Lambda, CloudWatch, Secrets Manager, S3, DNS, transferencia entre AZ y endpoints si se usan. Esas partidas no cuentan en el subtotal. Si el broker supera el presupuesto de desarrollo, mantener el flujo asíncrono de desarrollo en Compose y usar AWS para ventanas de integración presupuestadas.
 
 Para mayor disponibilidad, distribuir al menos dos tareas de cada servicio entre zonas, evitar dependencia de un solo NAT, evaluar RDS Multi-AZ y pasar RabbitMQ a clúster. El MQ solo aumenta unos USD 402.17/mes en la comparación de tamaños iguales. Confirmar tasa regional, clase, motor, configuración y cargos en AWS Pricing Calculator antes del despliegue. [Tarifas de Fargate y ALB](https://docs.aws.amazon.com/solutions/latest/prebid-server-deployment-on-aws/cost1.html) · [VPC e IPv4](https://aws.amazon.com/vpc/pricing/) · [Tarifas de Amazon MQ](https://aws.amazon.com/amazon-mq/pricing/) · [Clases actuales de RabbitMQ](https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/rmq-broker-instance-types.html) · [Precios de RDS PostgreSQL](https://aws.amazon.com/rds/postgresql/pricing/).
 

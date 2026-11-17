@@ -72,3 +72,44 @@ variable "mq_admin_password" {
     error_message = "La contraseña inicial de MQ debe tener 12 a 250 caracteres y excluir comas."
   }
 }
+
+
+variable "compute" {
+  description = "Configuración de ECS y del ALB por entorno. Requiere red, PostgreSQL y RabbitMQ."
+  type = object({
+    image_digests = object({
+      airport   = string
+      itinerary = string
+      web       = string
+    })
+    hostname             = string
+    certificate_arn      = string
+    hosted_zone_id       = optional(string)
+    itinerary_db_secret  = string
+    rabbitmq_url_secret  = string
+    secrets_kms_key_arns = optional(set(string), [])
+    desired_count        = optional(number, 1)
+    log_retention_days   = optional(number, 14)
+  })
+  default = null
+
+  validation {
+    condition     = var.compute == null || (var.network != null && var.database != null && var.messaging != null)
+    error_message = "Activa network, database y messaging antes de configurar compute."
+  }
+
+  validation {
+    condition = var.compute == null || try(alltrue([
+      for digest in values(var.compute.image_digests) : can(regex("^sha256:[0-9a-f]{64}$", digest))
+    ]), false)
+    error_message = "Cada imagen debe identificarse mediante su digest sha256 de ECR."
+  }
+
+  validation {
+    condition = var.compute == null || try(
+      var.compute.desired_count >= 0 && floor(var.compute.desired_count) == var.compute.desired_count,
+      false
+    )
+    error_message = "desired_count debe ser un entero no negativo."
+  }
+}

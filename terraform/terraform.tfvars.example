@@ -13,3 +13,18 @@ environment  = "dev"
 # database  = {}
 # messaging = {}
 # La contraseña inicial de Amazon MQ se inyecta fuera de este archivo.
+
+
+# Activa ECS tras publicar imágenes, preparar bases, cola y secretos.
+# compute = {
+#   image_digests = {
+#     airport   = "sha256:<digest de airport-service>"
+#     itinerary = "sha256:<digest de itinerary-service>"
+#     web       = "sha256:<digest de web-app>"
+#   }
+#   hostname             = "itinerarios.example.com"
+#   certificate_arn      = "<ARN de ACM en la región del ALB>"
+#   itinerary_db_secret = "<ARN del secreto que contiene DATABASE_URL>"
+#   rabbitmq_url_secret  = "<ARN del secreto que contiene RABBITMQ_URL>"
+#   # hosted_zone_id     = "<ID de zona pública de Route 53>"
+# }
