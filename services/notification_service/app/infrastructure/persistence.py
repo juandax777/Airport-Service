@@ -1,4 +1,5 @@
 from sqlalchemy import String, create_engine
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
@@ -37,6 +38,15 @@ class SqlAlchemyNotificationRepository:
 
     def save(self, notification: Notification) -> None:
         with Session(self.engine) as session:
+            if self.engine.dialect.name == "postgresql":
+                statement = insert(NotificationRow).values(
+                    event_id=notification.event_id,
+                    itinerary_id=notification.itinerary_id,
+                    status=notification.status,
+                )
+                session.execute(statement.on_conflict_do_nothing(index_elements=["event_id"]))
+                session.commit()
+                return
             session.add(
                 NotificationRow(
                     event_id=notification.event_id,
@@ -48,4 +58,4 @@ class SqlAlchemyNotificationRepository:
 
 
 def create_engine_from_url(database_url: str) -> Engine:
-    return create_engine(database_url)
+    return create_engine(database_url, pool_pre_ping=True, hide_parameters=True)

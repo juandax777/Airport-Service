@@ -37,5 +37,10 @@ jobs:
           INCLUDE_RDS_CA: ${{ matrix.service == 'itinerary_service' }}
         run: |
           IMAGE="${{ steps.ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY_PREFIX }}/${{ matrix.repository }}:${{ github.sha }}"
-          docker build --platform linux/amd64 --build-arg INCLUDE_RDS_CA="$INCLUDE_RDS_CA" -t "$IMAGE" "services/${{ matrix.service }}"
+          if [ "${{ matrix.service }}" = "notification_service" ]; then
+            docker buildx build --load --platform linux/amd64 --provenance=false \
+              -f services/notification_service/Dockerfile.lambda -t "$IMAGE" services/notification_service
+          else
+            docker build --platform linux/amd64 --build-arg INCLUDE_RDS_CA="$INCLUDE_RDS_CA" -t "$IMAGE" "services/${{ matrix.service }}"
+          fi
           docker push "$IMAGE"

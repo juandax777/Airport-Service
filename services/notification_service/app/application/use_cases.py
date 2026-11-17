@@ -3,12 +3,21 @@ from .exceptions import InvalidItineraryCreatedEvent
 from .ports import NotificationRepository
 
 
+def _valid_identifier(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and 0 < len(value) <= 36
+        and bool(value.strip())
+        and value.isprintable()
+    )
+
+
 def _event_identifiers(event: object) -> tuple[str, str]:
     if not isinstance(event, dict):
         raise InvalidItineraryCreatedEvent("Event payload must be a JSON object")
 
     event_id = event.get("event_id")
-    if not isinstance(event_id, str) or not event_id.strip():
+    if not _valid_identifier(event_id):
         raise InvalidItineraryCreatedEvent("Event must contain a non-empty string event_id")
 
     data = event.get("data")
@@ -17,13 +26,13 @@ def _event_identifiers(event: object) -> tuple[str, str]:
 
     if "itinerary_id" in data:
         itinerary_id = data["itinerary_id"]
-        if not isinstance(itinerary_id, str) or not itinerary_id.strip():
+        if not _valid_identifier(itinerary_id):
             raise InvalidItineraryCreatedEvent(
                 "Event data.itinerary_id must be a non-empty string"
             )
     elif "id" in data:
         itinerary_id = data["id"]
-        if not isinstance(itinerary_id, str) or not itinerary_id.strip():
+        if not _valid_identifier(itinerary_id):
             raise InvalidItineraryCreatedEvent("Legacy event data.id must be a non-empty string")
     else:
         raise InvalidItineraryCreatedEvent(
