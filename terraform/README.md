@@ -1,6 +1,6 @@
 # Infraestructura AWS
 
-La raíz declara cuatro repositorios ECR con escaneo al publicar. Se conservan los nombres y las direcciones Terraform de Airport, Itinerary y Notification. Web App tiene su propio repositorio. Las declaraciones no acreditan que los repositorios existan en AWS. Las carpetas de red, cómputo, datos, mensajería, notificaciones, seguridad y monitoreo siguen como borradores.
+La raíz declara cuatro repositorios ECR con escaneo al publicar. Se conservan los nombres y las direcciones Terraform de Airport, Itinerary y Notification. Web App tiene su propio repositorio. Las declaraciones no acreditan que los repositorios existan en AWS. La fase 2 declara el backend S3, su bootstrap y un módulo de red optativo. Cómputo, datos, mensajería, notificaciones, seguridad y monitoreo siguen como borradores.
 
 Docker Compose sigue siendo el entorno local. Allí Web App consume Airport e Itinerary, Itinerary valida aeropuertos y publica a RabbitMQ, y el consumidor en contenedor registra las notificaciones en su propia base. Cada servicio persistente tiene una migración SQL inicial versionada. El arranque de la aplicación y el flujo de migraciones deberán revisarse juntos antes del despliegue.
 
@@ -20,6 +20,12 @@ La raíz usa Terraform 1.10 o posterior y un backend S3 parcial con bloqueo nati
 Para OIDC, restringir la confianza por audiencia y sujeto de GitHub, con entorno protegido para despliegue. Usar un rol de ejecución ECS separado de cada rol de tarea. Dar a Lambda permisos para su origen MQ, conectividad VPC, logs y los secretos específicos que necesita. Entregar URLs de servicios y referencias a secretos por configuración. En RDS usar la gestión de contraseña maestra de RDS y aprovisionar los usuarios de aplicación por un flujo privado. Definir y revisar cómo se entrega la credencial inicial de MQ, porque una contraseña enviada mediante un atributo persistido por el proveedor puede terminar en el estado aunque esté marcada como sensible.
 
 En dev, evaluar una RDS PostgreSQL Single-AZ con dos bases y usuarios distintos, revocar CONNECT a PUBLIC en ambas y conceder a cada aplicación acceso solo a su base y sus objetos. La caída de la instancia afectaría a ambos servicios. Para separar fallos, escalado y restauraciones, usar dos instancias. Para tolerar caída de AZ, evaluar Multi-AZ por instancia independientemente. Ejecutar las migraciones con un rol separado, registrar su versión y serializar su ejecución. Revisar la creación de tablas al arrancar para que las migraciones sean la autoridad del esquema.
+
+## Red por entorno
+
+Configura el objeto network del ejemplo de variables con el CIDR y las zonas aprobadas. Conserva el orden de las zonas para no renumerar subredes existentes. En cada zona hay una subred pública para el ALB y NAT, una de aplicación con salida a internet mediante NAT y una de datos sin ruta por defecto. Las tareas usarán las subredes de aplicación sin IP pública. Reserva las subredes de datos para RDS y Amazon MQ. Configura por separado la conectividad del mapping de MQ y de la función Lambda.
+
+El grupo de seguridad por defecto se declara sin reglas. Cada módulo de carga necesita grupos propios para autorizar solo sus flujos. Define la entrada pública del ALB, el acceso ALB → Web, las llamadas internas, AMQPS y PostgreSQL al conectar cada módulo. Con un NAT, la primera zona concentra la salida y las tareas de otras zonas pueden generar transferencia entre zonas. Activa nat_per_az para enviar el tráfico de cada subred de aplicación por un NAT de su zona. [Disponibilidad de NAT](https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html).
 
 ## Eventos y recuperación
 

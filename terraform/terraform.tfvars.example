@@ -1,3 +1,10 @@
 aws_region   = "us-east-1"
 project_name = "personal-itineraries"
 environment  = "dev"
+
+# Activa la red después de confirmar el CIDR y las zonas de la cuenta.
+# network = {
+#   vpc_cidr           = "10.40.0.0/20"
+#   availability_zones = ["us-east-1a", "us-east-1b"]
+#   nat_per_az         = false
+# }
