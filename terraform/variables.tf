@@ -113,3 +113,26 @@ variable "compute" {
     error_message = "desired_count debe ser un entero no negativo."
   }
 }
+
+variable "notification_worker" {
+  description = "Lambda para la cola notifications. Requiere red, PostgreSQL y RabbitMQ."
+  type = object({
+    image_digest         = string
+    database_secret_arn  = string
+    broker_secret_arn    = string
+    secrets_kms_key_arns = optional(set(string), [])
+    enabled              = optional(bool, false)
+    alarm_actions        = optional(list(string), [])
+  })
+  default = null
+
+  validation {
+    condition     = var.notification_worker == null || (var.network != null && var.database != null && var.messaging != null)
+    error_message = "Activa network, database y messaging antes de configurar notification_worker."
+  }
+
+  validation {
+    condition     = var.notification_worker == null || can(regex("^sha256:[0-9a-f]{64}$", var.notification_worker.image_digest))
+    error_message = "Indica el digest sha256 de la imagen Lambda."
+  }
+}

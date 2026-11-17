@@ -28,3 +28,11 @@ environment  = "dev"
 #   rabbitmq_url_secret  = "<ARN del secreto que contiene RABBITMQ_URL>"
 #   # hosted_zone_id     = "<ID de zona pública de Route 53>"
 # }
+
+# Prepara Lambda con el mapping deshabilitado hasta completar el aprovisionamiento.
+# notification_worker = {
+#   image_digest        = "sha256:<digest de la imagen Lambda de notification-service>"
+#   database_secret_arn = "<ARN del secreto DATABASE_URL de notifications_app>"
+#   broker_secret_arn   = "<ARN del secreto JSON del consumidor RabbitMQ>"
+#   enabled             = false
+# }
