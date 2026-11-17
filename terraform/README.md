@@ -1,6 +1,6 @@
 # Infraestructura AWS
 
-La raíz declara cuatro repositorios ECR con escaneo al publicar. Se conservan los nombres y las direcciones Terraform de Airport, Itinerary y Notification. Web App tiene su propio repositorio. Las declaraciones no acreditan que los repositorios existan en AWS. La fase 2 declara el backend S3, su bootstrap y un módulo de red optativo. Cómputo, datos, mensajería, notificaciones, seguridad y monitoreo siguen como borradores.
+La raíz declara cuatro repositorios ECR con escaneo al publicar. Se conservan los nombres y las direcciones Terraform de Airport, Itinerary y Notification. Web App tiene su propio repositorio. Las declaraciones no acreditan que los repositorios existan en AWS. La fase 2 declara el backend S3, su bootstrap y un módulo de red optativo. La fase 3 agrega RDS y Amazon MQ privados y un flujo de aprovisionamiento y migración desde un ejecutor privado. Cómputo, notificaciones y monitoreo siguen pendientes.
 
 Docker Compose sigue siendo el entorno local. Allí Web App consume Airport e Itinerary, Itinerary valida aeropuertos y publica a RabbitMQ, y el consumidor en contenedor registra las notificaciones en su propia base. Cada servicio persistente tiene una migración SQL inicial versionada. El arranque de la aplicación y el flujo de migraciones deberán revisarse juntos antes del despliegue.
 
@@ -26,6 +26,10 @@ En dev, evaluar una RDS PostgreSQL Single-AZ con dos bases y usuarios distintos,
 Configura el objeto network del ejemplo de variables con el CIDR y las zonas aprobadas. Conserva el orden de las zonas para no renumerar subredes existentes. En cada zona hay una subred pública para el ALB y NAT, una de aplicación con salida a internet mediante NAT y una de datos sin ruta por defecto. Las tareas usarán las subredes de aplicación sin IP pública. Reserva las subredes de datos para RDS y Amazon MQ. Configura por separado la conectividad del mapping de MQ y de la función Lambda.
 
 El grupo de seguridad por defecto se declara sin reglas. Cada módulo de carga necesita grupos propios para autorizar solo sus flujos. Define la entrada pública del ALB, el acceso ALB → Web, las llamadas internas, AMQPS y PostgreSQL al conectar cada módulo. Con un NAT, la primera zona concentra la salida y las tareas de otras zonas pueden generar transferencia entre zonas. Activa nat_per_az para enviar el tráfico de cada subred de aplicación por un NAT de su zona. [Disponibilidad de NAT](https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html).
+
+## Datos y mensajería
+
+Activa los objetos database y messaging del ejemplo después de configurar network. El broker de evaluación es RabbitMQ 4.3 en mq.m7g.medium. Para un clúster, configura tres zonas y selecciona una clase admitida para clúster. Usa la [guía de operaciones](operations/README.md) para crear bases y usuarios, aplicar SQL versionado y preparar la topología RabbitMQ.
 
 ## Eventos y recuperación
 

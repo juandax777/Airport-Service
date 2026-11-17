@@ -33,12 +33,16 @@ def create_app() -> FastAPI:
     use_cases = ItineraryUseCases(
         repository=repository,
         airport_validator=HttpAirportValidator(airport_service_url),
-        event_publisher=RabbitMqCreatedEventPublisher(rabbitmq_url),
+        event_publisher=RabbitMqCreatedEventPublisher(
+            rabbitmq_url,
+            declare_topology=os.getenv("RABBITMQ_DECLARE_TOPOLOGY", "true") == "true",
+        ),
     )
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        repository.initialize()
+        if os.getenv("DATABASE_AUTO_CREATE", "true") == "true":
+            repository.initialize()
         yield
 
     application = FastAPI(

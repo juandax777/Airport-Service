@@ -29,17 +29,23 @@ def build_itinerary_created_event(
 
 
 class RabbitMqCreatedEventPublisher:
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, *, declare_topology: bool = True) -> None:
         self.url = url
+        self.declare_topology = declare_topology
 
     async def publish(self, itinerary: Itinerary) -> None:
         event = build_itinerary_created_event(itinerary)
         connection = await aio_pika.connect_robust(self.url)
         async with connection:
-            channel = await connection.channel()
-            exchange = await channel.declare_exchange(
-                "itineraries", aio_pika.ExchangeType.TOPIC, durable=True
+            channel = await connection.channel(
+                on_return_raises=not self.declare_topology
             )
+            if self.declare_topology:
+                exchange = await channel.declare_exchange(
+                    "itineraries", aio_pika.ExchangeType.TOPIC, durable=True
+                )
+            else:
+                exchange = await channel.get_exchange("itineraries", ensure=False)
             message = aio_pika.Message(
                 body=json.dumps(event).encode(),
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
