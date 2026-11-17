@@ -1,3 +1,27 @@
-# Pendiente: definir PostgreSQL administrado, almacenamiento, respaldos y acceso privado.
-# Mantener bases y permisos independientes para itinerarios y notificaciones.
-# Decidir si comparten instancia y cómo se ejecutarán las migraciones versionadas.
+resource "aws_db_subnet_group" "this" {
+  name       = var.name
+  subnet_ids = var.subnet_ids
+}
+
+resource "aws_db_instance" "this" {
+  for_each = var.instances
+
+  identifier                  = "${var.name}-${each.key}"
+  engine                      = "postgres"
+  engine_version              = var.engine_version
+  instance_class              = var.instance_class
+  allocated_storage           = var.storage_gib
+  storage_type                = "gp3"
+  storage_encrypted           = true
+  username                    = "platform_admin"
+  manage_master_user_password = true
+  db_subnet_group_name        = aws_db_subnet_group.this.name
+  vpc_security_group_ids      = [var.security_group_ids[each.key]]
+  publicly_accessible         = false
+  multi_az                    = var.multi_az
+  backup_retention_period     = 7
+  deletion_protection         = true
+  skip_final_snapshot         = false
+  final_snapshot_identifier   = "${var.name}-${each.key}-final"
+  copy_tags_to_snapshot       = true
+}

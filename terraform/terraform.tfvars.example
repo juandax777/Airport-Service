@@ -8,3 +8,8 @@ environment  = "dev"
 #   availability_zones = ["us-east-1a", "us-east-1b"]
 #   nat_per_az         = false
 # }
+
+# Habilita solo después de configurar network y revisar el presupuesto.
+# database  = {}
+# messaging = {}
+# La contraseña inicial de Amazon MQ se inyecta fuera de este archivo.
