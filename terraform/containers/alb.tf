@@ -1,3 +1,7 @@
+locals {
+  https_enabled = var.config.certificate_arn != null
+}
+
 resource "aws_lb" "web" {
   name_prefix               = "web-"
   load_balancer_type        = "application"
@@ -32,18 +36,25 @@ resource "aws_lb_listener" "redirect" {
   protocol          = "HTTP"
 
   default_action {
-    type = "redirect"
+    type             = local.https_enabled ? "redirect" : "forward"
+    target_group_arn = local.https_enabled ? null : aws_lb_target_group.web.arn
 
-    redirect {
-      host        = var.config.hostname
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
+    dynamic "redirect" {
+      for_each = local.https_enabled ? [1] : []
+
+      content {
+        host        = var.config.hostname
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
     }
   }
 }
 
 resource "aws_lb_listener" "https" {
+  count = local.https_enabled ? 1 : 0
+
   load_balancer_arn = aws_lb.web.arn
   port              = 443
   protocol          = "HTTPS"
@@ -54,6 +65,11 @@ resource "aws_lb_listener" "https" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.web.arn
   }
+}
+
+moved {
+  from = aws_lb_listener.https
+  to   = aws_lb_listener.https[0]
 }
 
 resource "aws_route53_record" "web" {

@@ -1,10 +1,10 @@
 # Primer despliegue de dev en AWS
 
-Usa Terraform desde tu equipo para crear la infraestructura y AWS CloudShell dentro de la VPC para inicializar PostgreSQL y RabbitMQ. Para reducir componentes y costo, parte de una región, una tarea por servicio, un NAT, una instancia RDS con dos bases y un broker de un nodo. El equipo accede por HTTPS desde las IPv4 que autorice.
+Usa Terraform desde tu equipo para crear la infraestructura y AWS CloudShell dentro de la VPC para inicializar PostgreSQL y RabbitMQ. Para reducir componentes y costo, parte de una región, una tarea por servicio, un NAT, una instancia RDS con dos bases y un broker de un nodo. El equipo accede desde las IPv4 que autorice. Si no tienes dominio, usa el DNS que asigna el balanceador y datos ficticios en la demo HTTP.
 
 ## 1. Preparar cuenta y versión
 
-- Acuerda cuenta, región, dos zonas, presupuesto, dominio, certificado ACM emitido en la región e IPv4 públicas del equipo. Cotiza el broker de un nodo, RDS, Fargate, ALB, NAT y los endpoints de Lambda antes de crear el entorno. Activa alertas de presupuesto.
+- Acuerda cuenta, región, dos zonas, presupuesto e IPv4 públicas del equipo. Para usar HTTPS, prepara además un dominio y un certificado ACM emitido en la región del ALB. Cotiza el broker de un nodo, RDS, Fargate, ALB, NAT y los endpoints de Lambda antes de crear el entorno. Activa alertas de presupuesto.
 - Instala Terraform 1.10.5, AWS CLI y Docker. Usa una sesión temporal de AWS y confirma la cuenta con `aws sts get-caller-identity`. Revisa el PR contra `main` y los resultados del CI. Trabaja con el mismo commit para la infraestructura y las imágenes.
 - En `terraform/` y `terraform/bootstrap/`, genera y versiona `.terraform.lock.hcl` con `terraform providers lock -platform=windows_amd64 -platform=linux_amd64`. Si el equipo usa otras plataformas, inclúyelas. Los estados, planes guardados y valores reales van fuera de Git. [Bloqueo de proveedores](https://developer.hashicorp.com/terraform/cli/commands/providers/lock).
 
@@ -23,7 +23,7 @@ Confirma `apply` solo si la vista previa coincide con lo acordado. Crea los role
 Copia `backend.dev.hcl.example` a `backend.dev.hcl` y `terraform.tfvars.example` a `terraform.tfvars` dentro de `terraform/`. Completa el backend y habilita `network`, `database` y `messaging`. Inyecta `TF_VAR_mq_admin_password` desde un almacén de secretos para cada sesión de Terraform que habilite el broker. Revisa que el tipo y la versión del broker estén disponibles en tu región. Deja `compute` y `notification_worker` sin configurar en esta etapa.
 
 ```powershell
-terraform -chdir=terraform init -backend-config=backend.dev.hcl
+terraform -chdir=terraform init '-backend-config=backend.dev.hcl'
 terraform -chdir=terraform plan
 terraform -chdir=terraform apply
 terraform -chdir=terraform output -json network
@@ -39,7 +39,7 @@ Abre una sesión CloudShell en una subred privada `app` con el grupo `operations
 
 ## 4. Levantar y comprobar la aplicación
 
-Completa `compute` con los tres digests ECS, dominio, certificado, ARN y `allowed_web_cidrs` con las IP del equipo. Configura `notification_worker` con el digest de Lambda y sus dos ARN. Mantén `enabled = false` para la primera aplicación. Ejecuta `terraform -chdir=terraform plan`, revisa el resultado y aplica en la misma configuración. Si el DNS se gestiona externamente, apunta el dominio al ALB que indica `terraform -chdir=terraform output -json compute`.
+Completa `compute` con los tres digests ECS, los ARN de los secretos y `allowed_web_cidrs` con las IP del equipo. Para la URL predeterminada de AWS, deja `hostname`, `certificate_arn` y `hosted_zone_id` sin configurar. Para HTTPS, configura el dominio y el certificado. Configura `notification_worker` con el digest de Lambda y sus dos ARN. Mantén `enabled = false` para la primera aplicación. Ejecuta `terraform -chdir=terraform plan`, revisa el resultado y aplica en la misma configuración. Consulta `terraform -chdir=terraform output -json compute` para obtener `web_url`. Si usas un dominio con DNS externo, apúntalo al ALB indicado allí.
 
 Cuando los servicios estén saludables y hayas verificado la cola, cambia `notification_worker.enabled` a `true`, revisa y aplica el nuevo plan. Desde una IP autorizada, comprueba el mapa, la creación y edición de un itinerario y su fila en el historial de notificaciones. Comprueba que desde fuera de las redes autorizadas la web no sea accesible y que una entrega repetida del mismo `event_id` genere una sola fila. Usa datos ficticios.
 

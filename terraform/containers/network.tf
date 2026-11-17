@@ -16,7 +16,7 @@ resource "aws_security_group" "component" {
 
 resource "aws_vpc_security_group_ingress_rule" "team_web" {
   for_each = {
-    for pair in setproduct(var.config.allowed_web_cidrs, [80, 443]) :
+    for pair in setproduct(var.config.allowed_web_cidrs, local.https_enabled ? toset([80, 443]) : toset([80])) :
     "${pair[0]}:${pair[1]}" => { cidr = pair[0], port = pair[1] }
   }
 

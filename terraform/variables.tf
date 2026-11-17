@@ -82,8 +82,8 @@ variable "compute" {
       itinerary = string
       web       = string
     })
-    hostname             = string
-    certificate_arn      = string
+    hostname             = optional(string)
+    certificate_arn      = optional(string)
     hosted_zone_id       = optional(string)
     allowed_web_cidrs    = set(string)
     itinerary_db_secret  = string
@@ -97,6 +97,16 @@ variable "compute" {
   validation {
     condition     = var.compute == null || (var.network != null && var.database != null && var.messaging != null)
     error_message = "Activa network, database y messaging antes de configurar compute."
+  }
+
+  validation {
+    condition = var.compute == null || try(
+      var.compute.hostname == null && var.compute.certificate_arn == null && var.compute.hosted_zone_id == null
+      ? var.environment == "dev"
+      : try(trimspace(var.compute.hostname) != "" && trimspace(var.compute.certificate_arn) != "", false),
+      false
+    )
+    error_message = "Configura hostname y certificate_arn juntos. Solo dev admite la URL HTTP por defecto sin dominio ni zona DNS."
   }
 
   validation {

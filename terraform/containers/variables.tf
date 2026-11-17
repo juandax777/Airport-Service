@@ -36,8 +36,8 @@ variable "config" {
       itinerary = string
       web       = string
     })
-    hostname               = string
-    certificate_arn        = string
+    hostname               = optional(string)
+    certificate_arn        = optional(string)
     hosted_zone_id         = optional(string)
     allowed_web_cidrs      = set(string)
     itinerary_db_secret   = string

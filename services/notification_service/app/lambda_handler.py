@@ -65,10 +65,10 @@ def handler(event: dict, _context: object) -> None:
     repo = repository()
     for records in queues.values():
         if not isinstance(records, list):
-            raise ValueError("Expected an Amazon MQ message list")
+            raise TypeError("Expected an Amazon MQ message list")
         for record in records:
             if not isinstance(record, dict):
-                raise ValueError("Expected an Amazon MQ record")
+                raise TypeError("Expected an Amazon MQ record")
             try:
                 handle_itinerary_created(decode(record), repo)
             except InvalidItineraryCreatedEvent:

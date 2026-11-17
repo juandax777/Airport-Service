@@ -1,7 +1,7 @@
 output "deployment" {
   value = {
     cluster_name   = aws_ecs_cluster.this.name
-    web_url        = "https://${var.config.hostname}"
+    web_url        = local.https_enabled ? "https://${var.config.hostname}" : "http://${aws_lb.web.dns_name}"
     alb_dns_name   = aws_lb.web.dns_name
     alb_zone_id    = aws_lb.web.zone_id
     service_names = {

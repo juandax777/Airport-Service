@@ -123,6 +123,7 @@ resource "aws_ecs_service" "web" {
     aws_vpc_security_group_ingress_rule.app,
     aws_vpc_security_group_egress_rule.app,
     aws_ecs_service.itinerary,
+    aws_lb_listener.redirect,
     aws_lb_listener.https,
   ]
 }

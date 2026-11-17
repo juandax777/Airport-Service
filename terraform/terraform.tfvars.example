@@ -22,8 +22,9 @@ environment  = "dev"
 #     itinerary = "sha256:<digest de itinerary-service>"
 #     web       = "sha256:<digest de web-app>"
 #   }
-#   hostname             = "itinerarios.example.com"
-#   certificate_arn      = "<ARN de ACM en la región del ALB>"
+#   # Para HTTPS, define ambos. Sin ellos, dev usa el DNS del ALB por HTTP.
+#   # hostname          = "itinerarios.example.com"
+#   # certificate_arn   = "<ARN de ACM en la región del ALB>"
 #   allowed_web_cidrs    = ["203.0.113.10/32"] # Reemplaza por la IPv4 pública del equipo.
 #   itinerary_db_secret = "<ARN del secreto que contiene DATABASE_URL>"
 #   rabbitmq_url_secret  = "<ARN del secreto que contiene RABBITMQ_URL>"
