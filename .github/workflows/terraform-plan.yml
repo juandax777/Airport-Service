@@ -1,0 +1,93 @@
+name: Plan AWS infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: AWS environment
+        type: choice
+        options: [dev, prod]
+        default: dev
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-plan-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    if: ${{ github.ref == 'refs/heads/main' && vars.AWS_DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ format('{0}-plan', inputs.target) }}
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: terraform
+    env:
+      TF_IN_AUTOMATION: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.5
+          terraform_wrapper: false
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_TERRAFORM_PLAN_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+      - name: Generate Terraform plan summary
+        env:
+          TARGET: ${{ inputs.target }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+          DEPLOYMENT_CONFIG: ${{ vars.TF_DEPLOYMENT_CONFIG }}
+          TF_VAR_mq_admin_password: ${{ secrets.TF_MQ_ADMIN_PASSWORD }}
+        run: |
+          set -eu
+          : "${AWS_REGION:?Set AWS_REGION in the GitHub environment}"
+          : "${STATE_BUCKET:?Set TF_STATE_BUCKET in the GitHub environment}"
+          : "${DEPLOYMENT_CONFIG:?Set TF_DEPLOYMENT_CONFIG in the GitHub environment}"
+
+          umask 077
+          config="$(mktemp --suffix=.tfvars.json)"
+          output="$(mktemp)"
+          trap 'rm -f -- "$config" "$output"' EXIT
+
+          jq -e --arg target "$TARGET" --arg region "$AWS_REGION" '
+            if type != "object" or has("mq_admin_password") then
+              error("Supply a JSON object without passwords")
+            else
+              . + {environment: $target, aws_region: $region}
+            end
+          ' <<< "$DEPLOYMENT_CONFIG" > "$config"
+
+          terraform init -input=false -no-color \
+            -backend-config="bucket=$STATE_BUCKET" \
+            -backend-config="key=$TARGET/terraform.tfstate" \
+            -backend-config="region=$AWS_REGION"
+
+          status=0
+          terraform plan -input=false -no-color -lock-timeout=2m -detailed-exitcode \
+            -var-file="$config" > "$output" 2>&1 || status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            echo "::error::Terraform plan failed. Reproduce it from an authorized operator session to inspect diagnostics."
+            exit "$status"
+          fi
+
+          {
+            echo "### Terraform plan for $TARGET"
+            if [ "$status" -eq 0 ]; then
+              echo "No changes."
+            else
+              grep -E '^Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy\.$' "$output" \
+                || echo "Changes detected. Review details in an authorized operator session."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

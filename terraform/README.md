@@ -39,6 +39,10 @@ El objeto compute habilita el clúster y el balanceador por entorno. Usa la [gu�
 
 El objeto notification_worker crea la función, el mapping deshabilitado por defecto, la red privada y las alarmas. Sigue la [guía de notificaciones](notifications/README.md) para preparar la imagen, los secretos y la migración de cuarentena antes de activar el consumidor.
 
+## GitHub Actions y OIDC
+
+La [guía de automatización](bootstrap/github-actions.md) explica cómo configurar dos roles OIDC por entorno, publicar imágenes a demanda y revisar el resumen de Terraform. La aplicación del plan queda en la sesión autorizada del operador.
+
 ## Eventos y recuperación
 
 Conservar el exchange `itineraries`, la clave `itinerary.created` y la cola `notifications`. Crear identidades separadas para bootstrap, publicación y consumo. Revisar qué declaraciones de topología hace hoy el código antes de retirar permisos de configuración. Preservar `ItineraryCreatedEvent` v1.0 con `data.itinerary_id`. El lector acepta `data.id` para mensajes antiguos. Lambda lee `rmqMessagesByQueue`, decodifica cada `data` de Base64 y valida el JSON de negocio. Mantener el adaptador de Compose y compartir la lógica de persistencia. Usar una restricción única con inserción atómica por `event_id`, y acordar cómo deduplicar cualquier mensaje histórico sin ese campo antes de habilitar el mapping. Nunca ejecutar los dos consumidores sobre la misma cola durante la transición. [Formato y entrega de Amazon MQ a Lambda](https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html).

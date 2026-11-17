@@ -1,3 +1,10 @@
 aws_region        = "us-east-1"
 aws_account_id    = "000000000000"
 state_bucket_name = "replace-with-approved-terraform-state-bucket"
+
+# github_actions = {
+#   repository            = "owner/repository"
+#   environment           = "dev"
+#   ecr_repository_prefix = "personal-itineraries-dev"
+#   # existing_provider_arn = "<ARN del proveedor GitHub OIDC de la cuenta>"
+# }

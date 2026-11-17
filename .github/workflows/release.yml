@@ -1,18 +1,30 @@
 name: Publish images to Amazon ECR
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      target:
+        description: AWS environment
+        type: choice
+        options: [dev, prod]
+        default: dev
 
 permissions:
   contents: read
-  id-token: write
+
+concurrency:
+  group: ecr-publish-${{ inputs.target }}
+  cancel-in-progress: false
 
 jobs:
   publish:
-    if: ${{ vars.AWS_DEPLOY_ENABLED == 'true' }}
+    if: ${{ github.ref == 'refs/heads/main' && vars.AWS_DEPLOY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ format('{0}-publish', inputs.target) }}
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
         include:
@@ -26,17 +38,23 @@ jobs:
             repository: notification-service
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ECR_PUBLISH_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
       - id: ecr
         uses: aws-actions/amazon-ecr-login@v2
       - name: Build and publish image
         env:
+          ECR_REPOSITORY_PREFIX: ${{ vars.ECR_REPOSITORY_PREFIX }}
           INCLUDE_RDS_CA: ${{ matrix.service == 'itinerary_service' }}
         run: |
-          IMAGE="${{ steps.ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY_PREFIX }}/${{ matrix.repository }}:${{ github.sha }}"
+          : "${ECR_REPOSITORY_PREFIX:?Set ECR_REPOSITORY_PREFIX in the GitHub environment}"
+          REPOSITORY="$ECR_REPOSITORY_PREFIX/${{ matrix.repository }}"
+          IMAGE="${{ steps.ecr.outputs.registry }}/$REPOSITORY:$GITHUB_SHA"
           if [ "${{ matrix.service }}" = "notification_service" ]; then
             docker buildx build --load --platform linux/amd64 --provenance=false \
               -f services/notification_service/Dockerfile.lambda -t "$IMAGE" services/notification_service
@@ -44,3 +62,6 @@ jobs:
             docker build --platform linux/amd64 --build-arg INCLUDE_RDS_CA="$INCLUDE_RDS_CA" -t "$IMAGE" "services/${{ matrix.service }}"
           fi
           docker push "$IMAGE"
+          DIGEST="$(aws ecr describe-images --repository-name "$REPOSITORY" \
+            --image-ids "imageTag=$GITHUB_SHA" --query 'imageDetails[0].imageDigest' --output text)"
+          printf '%s@%s\n' "${IMAGE%:*}" "$DIGEST" >> "$GITHUB_STEP_SUMMARY"
