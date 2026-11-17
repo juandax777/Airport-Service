@@ -87,3 +87,12 @@ temp/
 .archify/**/*.finalize*.json
 .archify/**/*.delivery.json
 .archify/**/*.browser-check.json
+
+# Terraform nested roots and local backend configuration
+terraform/**/.terraform/
+terraform/**/*.tfstate
+terraform/**/*.tfstate.*
+terraform/**/*.tfplan
+terraform/**/*.tfvars
+terraform/**/*.tfvars.json
+terraform/**/backend*.hcl
