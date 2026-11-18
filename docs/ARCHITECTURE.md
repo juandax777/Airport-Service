@@ -2,7 +2,7 @@
 
 ## 1. Propósito y alcance
 
-Sistema de Itinerarios Personales consulta aeropuertos colombianos, permite visualizarlos y gestionar itinerarios, y procesa una notificación después de crear un itinerario. Este documento describe la arquitectura implementada para desarrollo local con Docker Compose. La infraestructura AWS que aparece en `terraform/` es una preparación incompleta, no un entorno desplegado.
+Sistema de Itinerarios Personales consulta aeropuertos colombianos, permite visualizarlos y gestionar itinerarios, y procesa una notificación después de crear un itinerario. Las secciones de servicios y ejecución local describen Docker Compose. El entorno AWS `dev` está desplegado; su estado y guía operativa se documentan en [`terraform/DESPLIEGUE_DEV.md`](../terraform/DESPLIEGUE_DEV.md).
 
 ## 2. Vista de contexto y contenedores
 
@@ -65,7 +65,7 @@ Docker Compose inicia dos contenedores PostgreSQL con volúmenes separados. Actu
 - CI en `.github/workflows/ci.yml` instala dependencias, ejecuta Ruff y pytest, valida Compose, construye imágenes y escanea vulnerabilidades con Trivy.
 - k6 proporciona un escenario de carga manual, de solo lectura y dirigido a localhost; véase `tests/load/README.md`.
 - El análisis SonarQube es opcional en CI y requiere configurar las variables/secretos de GitHub descritos en `docs/GITHUB_REPOSITORY.md`.
-- `.github/workflows/release.yml` publica imágenes de backend en Amazon ECR cuando se habilita. No despliega aún la aplicación en ECS/Lambda. `terraform/` crea actualmente repositorios ECR; los demás recursos de AWS están pendientes de aprobación y definición.
+- `.github/workflows/release.yml` publica imágenes en Amazon ECR cuando se habilita. El entorno AWS `dev` usa Terraform para desplegar la aplicación en ECS/Fargate y Lambda, además de ALB, Route 53, ACM, RDS, Amazon MQ, VPC, Secrets Manager, CloudWatch y el backend de estado S3. Consulta el [registro del despliegue](../terraform/DESPLIEGUE_DEV.md).
 - El repositorio documenta ramas cortas y Pull Requests en `CONTRIBUTING.md`. La protección de `main`, los checks requeridos y las revisiones se configuran en GitHub; no se pueden garantizar solo con archivos del repositorio.
 - El README y las plantillas contemplan Jira, pero el tablero y su backlog viven fuera de Git. Relaciona cada tarea/PR con su ID de Jira, HU o RF.
 
@@ -80,7 +80,7 @@ Docker Compose inicia dos contenedores PostgreSQL con volúmenes separados. Actu
 
 - API Colombia es un proveedor externo; su formato se traduce dentro de Airport Service mediante un Adapter.
 - Las bases de datos permanecen aisladas por servicio.
-- Notificaciones se implementan actualmente como un consumidor en contenedor. La opción FaaS en AWS está descrita como objetivo, no como despliegue existente.
+- En Docker Compose, Notification Service se ejecuta como consumidor en contenedor; en AWS `dev`, Lambda consume los eventos de Amazon MQ y guarda el resultado simulado.
 - Outbox, autenticación JWT, resiliencia avanzada y observabilidad distribuida pertenecen a decisiones o niveles aún pendientes según `README.md` y `docs/requisitos.md`.
 - Cualquier cambio en HTTP o eventos debe actualizar el contrato, sus productores/consumidores y la documentación afectada en el mismo cambio.
 
@@ -90,6 +90,7 @@ Se agregan estas vistas interactivas en HTML. Las fuentes JSON están junto a ca
 
 | Vista | Diagrama interactivo | Fuente Archify |
 |---|---|---|
+| Despliegue AWS `dev` | [Abrir HTML](../.archify/aws-deployment-dev-20261117-221612/aws-deployment-dev.html) | [candidate.json](../.archify/aws-deployment-dev-20261117-221612/candidate.json) |
 | Arquitectura local del sistema | [Abrir HTML](../.archify/architecture-system-overview-20261009-175300/system-overview.html) | [candidate.json](../.archify/architecture-system-overview-20261009-175300/candidate.json) |
 | Capas hexagonales de Itinerary Service | [Abrir HTML](../.archify/architecture-hexagonal-itinerary-20261009-174334/hexagonal-itinerary.html) | [candidate.json](../.archify/architecture-hexagonal-itinerary-20261009-174334/candidate.json) |
 | Secuencia de creación y notificación | [Abrir HTML](../.archify/sequence-itinerary-creation-20261009-173423/itinerary-creation.html) | [candidate.json](../.archify/sequence-itinerary-creation-20261009-173423/candidate.json) |

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Despliegue AWS · Sistema de Itinerarios · dev",
+    "locale": "es",
+    "quality_profile": "showcase",
+    "output": ".archify/aws-deployment-dev-20261117-221612/aws-deployment-dev.html"
+  },
+  "components": [
+    { "id": "visitor", "type": "external", "label": "Visitante", "sublabel": "Navegador · Internet", "pos": [36, 330], "size": [132, 64] },
+    { "id": "route53", "type": "cloud", "label": "Amazon Route 53", "sublabel": "viajaporcolombia.click", "pos": [218, 330], "size": [154, 64] },
+    { "id": "alb", "type": "cloud", "label": "Application Load Balancer", "sublabel": "HTTPS 443 · IPv4 público", "pos": [470, 330], "size": [176, 68] },
+    { "id": "web", "type": "backend", "label": "Web App · ECS Fargate", "sublabel": "Servicio personal-itineraries-dev-web", "pos": [660, 220], "size": [196, 68] },
+    { "id": "itinerary", "type": "backend", "label": "Itinerary Service · ECS", "sublabel": "CRUD · valida · publica evento", "pos": [920, 220], "size": [190, 68] },
+    { "id": "airport", "type": "backend", "label": "Airport Service · ECS", "sublabel": "API Colombia · catálogo", "pos": [660, 490], "size": [176, 68] },
+    { "id": "colombia_api", "type": "external", "label": "API Colombia", "sublabel": "Datos externos de aeropuertos", "pos": [425, 620], "size": [160, 68] },
+    { "id": "rds", "type": "database", "label": "Amazon RDS · PostgreSQL", "sublabel": "DB itineraries + notifications", "pos": [920, 490], "size": [190, 68] },
+    { "id": "mq", "type": "messagebus", "label": "Amazon MQ · RabbitMQ 4.3", "sublabel": "exchange itineraries · cola notifications", "pos": [1170, 220], "size": [206, 70] },
+    { "id": "mq_mapping", "type": "cloud", "label": "MQ event source mapping", "sublabel": "cola notifications → Lambda", "pos": [1170, 400], "size": [194, 68] },
+    { "id": "lambda", "type": "backend", "label": "AWS Lambda · notifications", "sublabel": "Procesa evento · guarda resultado simulado", "pos": [1170, 580], "size": [202, 72] },
+    { "id": "acm", "type": "security", "label": "AWS Certificate Manager", "sublabel": "Certificado TLS para el dominio", "pos": [218, 700], "size": [184, 68] },
+    { "id": "secrets", "type": "security", "label": "AWS Secrets Manager", "sublabel": "Credenciales de DB y RabbitMQ", "pos": [660, 700], "size": [184, 68] },
+    { "id": "ecr", "type": "cloud", "label": "Amazon ECR", "sublabel": "4 repositorios de imágenes", "pos": [660, 90], "size": [158, 64] },
+    { "id": "cloudwatch", "type": "cloud", "label": "Amazon CloudWatch", "sublabel": "Logs y alarmas", "pos": [1170, 90], "size": [166, 64] },
+    { "id": "tfstate", "type": "cloud", "label": "Amazon S3", "sublabel": "Estado remoto Terraform", "pos": [218, 90], "size": [150, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "AWS us-east-1 · VPC personal-itineraries-dev · 2 AZ", "wraps": ["alb", "web", "itinerary", "airport", "rds", "mq", "mq_mapping", "lambda"], "pad": 24 }
+  ],
+  "connections": [
+    { "from": "visitor", "to": "route53", "label": "consulta DNS" },
+    { "from": "route53", "to": "alb", "label": "alias A", "variant": "emphasis" },
+    { "from": "acm", "to": "alb", "label": "TLS", "variant": "security", "fromSide": "top", "toSide": "bottom" },
+    { "from": "alb", "to": "web", "label": "HTTP target" },
+    { "from": "web", "to": "itinerary", "label": "Service Connect" },
+    { "from": "web", "to": "airport", "label": "consulta de aeropuertos", "fromSide": "bottom", "toSide": "top" },
+    { "from": "itinerary", "to": "airport", "label": "valida salida y llegada", "fromSide": "bottom", "toSide": "top" },
+    { "from": "airport", "to": "colombia_api", "label": "HTTP · salida a Internet", "variant": "dashed" },
+    { "from": "itinerary", "to": "rds", "label": "PostgreSQL · itineraries", "fromSide": "bottom", "toSide": "top" },
+    { "from": "itinerary", "to": "mq", "label": "publica itinerary.created", "variant": "dashed" },
+    { "from": "mq", "to": "mq_mapping", "label": "cola notifications", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "from": "mq_mapping", "to": "lambda", "label": "invoca consumidor", "variant": "dashed" },
+    { "from": "lambda", "to": "rds", "label": "PostgreSQL · notifications", "fromSide": "left", "toSide": "right" },
+    { "from": "ecr", "to": "web", "label": "imagen de contenedor" },
+    { "from": "lambda", "to": "cloudwatch", "label": "logs y métricas" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Red y acceso", "items": ["ALB público IPv4 en la VPC; HTTP redirige a HTTPS.", "ECS, RDS y RabbitMQ usan subredes privadas; la VPC tiene seis subredes en dos zonas y un NAT Gateway.", "La app no tiene inicio de sesión: los itinerarios son compartidos y cualquier visitante puede consultarlos y modificarlos."] },
+    { "dot": "violet", "title": "Servicios internos", "items": ["ECS Fargate ejecuta Airport, Itinerary y Web App; Cloud Map Service Connect permite sus llamadas internas.", "Una instancia PostgreSQL aloja las bases lógicas separadas itineraries y notifications.", "RabbitMQ entrega el evento a Lambda; la notificación queda registrada como simulated_sent, no se envía un correo real."] },
+    { "dot": "amber", "title": "Operación", "items": ["ECR conserva las cuatro imágenes de servicio; Secrets Manager entrega credenciales a las cargas.", "CloudWatch contiene logs y alarmas; S3 conserva el estado remoto de Terraform.", "CloudShell tiene un entorno conectado a la VPC para tareas privadas de operación y migración."] }
+  ]
+}
+
+
+

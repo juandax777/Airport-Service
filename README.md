@@ -34,7 +34,7 @@ Los identificadores, prioridades, niveles y criterios de aceptación de esos doc
 - Crear, consultar, actualizar y eliminar itinerarios.
 - Validar salida y llegada antes de persistir un itinerario.
 - Publicar y procesar `ItineraryCreatedEvent` de forma asíncrona.
-- Procesar eventos y registrar notificaciones con un consumidor local en contenedor; el despliegue FaaS en AWS aún no está implementado.
+- Procesar eventos y registrar notificaciones con un consumidor local en contenedor o con Lambda en AWS. El despliegue académico y sus verificaciones están documentados en [`terraform/DESPLIEGUE_DEV.md`](terraform/DESPLIEGUE_DEV.md).
 
 ## Alcance por nivel
 

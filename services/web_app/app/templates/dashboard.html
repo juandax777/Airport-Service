@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block page_id %}dashboard{% endblock %}
-{% block head %}<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script><link rel="stylesheet" href="{{ url_for('static', path='/css/destination-flow.css') }}">{% endblock %}
+{% block head %}<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script><link rel="stylesheet" href="{{ url_for('static', path='/css/destination-flow.css').path }}">{% endblock %}
 {% block content %}
 <section class="hero">
   <div><p class="eyebrow">Explora Colombia</p><h1>Tu próximo viaje comienza en el mapa</h1><p>Selecciona un aeropuerto y conviértelo en el destino de tu próximo itinerario.</p></div>
@@ -11,4 +11,4 @@
   <aside class="panel"><label class="search-label" for="airport-search">Buscar aeropuerto</label><input id="airport-search" class="search" type="search" placeholder="Nombre o ciudad…"><div id="airport-list" class="airport-list" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div></div></aside>
 </section>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', path='/js/destination-flow.js') }}" defer></script><script src="{{ url_for('static', path='/js/map-coordinate-fix.js') }}" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/js/destination-flow.js').path }}" defer></script><script src="{{ url_for('static', path='/js/map-coordinate-fix.js').path }}" defer></script>{% endblock %}

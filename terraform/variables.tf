@@ -128,11 +128,11 @@ variable "compute" {
     condition = var.compute == null || try(
       length(var.compute.allowed_web_cidrs) > 0 && alltrue([
         for cidr in var.compute.allowed_web_cidrs :
-        can(cidrnetmask(cidr)) && tonumber(split("/", cidr)[1]) > 0 && cidrhost(cidr, 0) == split("/", cidr)[0]
+        can(cidrnetmask(cidr)) && (tonumber(split("/", cidr)[1]) > 0 || var.compute.certificate_arn != null) && cidrhost(cidr, 0) == split("/", cidr)[0]
       ]),
       false
     )
-    error_message = "Indica uno o más CIDR IPv4 canónicos del equipo, por ejemplo una IP pública con /32. No se permite un prefijo /0."
+    error_message = "Indica uno o más CIDR IPv4 canónicos. El acceso público 0.0.0.0/0 requiere HTTPS."
   }
 }
 

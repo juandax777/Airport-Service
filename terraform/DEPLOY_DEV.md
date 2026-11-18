@@ -5,7 +5,7 @@ Usa Terraform desde tu equipo para crear la infraestructura y AWS CloudShell den
 ## 1. Preparar cuenta y versión
 
 - Acuerda cuenta, región, dos zonas, presupuesto e IPv4 públicas del equipo. Para usar HTTPS, prepara además un dominio y un certificado ACM emitido en la región del ALB. Cotiza el broker de un nodo, RDS, Fargate, ALB, NAT y los endpoints de Lambda antes de crear el entorno. Activa alertas de presupuesto.
-- Instala Terraform 1.10.5, AWS CLI y Docker. Usa una sesión temporal de AWS y confirma la cuenta con `aws sts get-caller-identity`. Revisa el PR contra `main` y los resultados del CI. Trabaja con el mismo commit para la infraestructura y las imágenes.
+- Instala Terraform compatible con `versions.tf`, AWS CLI y Docker. El despliegue registrado se hizo con Terraform 1.17.2. Usa una sesión temporal de AWS y confirma la cuenta con `aws sts get-caller-identity`. Revisa los cambios y usa imágenes identificadas por digest.
 - En `terraform/` y `terraform/bootstrap/`, genera y versiona `.terraform.lock.hcl` con `terraform providers lock -platform=windows_amd64 -platform=linux_amd64`. Si el equipo usa otras plataformas, inclúyelas. Los estados, planes guardados y valores reales van fuera de Git. [Bloqueo de proveedores](https://developer.hashicorp.com/terraform/cli/commands/providers/lock).
 
 ## 2. Crear estado, red y datos
