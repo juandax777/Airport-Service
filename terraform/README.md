@@ -55,18 +55,6 @@ Itinerary guarda y luego publica. Las confirmaciones de publicación y alarmas a
 
 ## Costos de referencia
 
-USD bajo demanda en us-east-1, 730 horas al mes, sin créditos ni impuestos. El entorno propuesto parte de una tarea por servicio, bajo tráfico, un NAT y una instancia compartida RDS. Las cifras se derivan de tarifas AWS publicadas.
-
-| Componente | Supuesto | USD/mes |
-|---|---|---:|
-| ECS Fargate x86 | 3 tareas, 0.5 vCPU y 1 GB por tarea, incluida la capacidad para Service Connect, a USD 0.04048/vCPU-h y 0.004445/GB-h | 54.06 |
-| ALB | USD 0.0225/h más uso de LCU a USD 0.008/LCU-h | 16.43 + uso |
-| NAT zonal e IPv4 públicas | 1 NAT a 0.045/h y 3 IPv4 a 0.005/h cada una, incluidas 2 del ALB | 43.80 + tráfico |
-| MQ de referencia | Un mq.m7g.large a 0.2734/h y 15 GiB a 0.10/GiB-mes, extrapolando la tarifa por nodo del ejemplo AWS | 201.08 |
-| MQ de alta disponibilidad | Tres nodos mq.m7g.large y 45 GiB en total a las mismas tarifas | 603.25 |
-
-El subtotal de ECS, ALB y NAT/IPv4 es aproximadamente USD 114.29/mes. Con el broker de referencia asciende a USD 315.37/mes antes de RDS y costos variables. AWS retiró mq.t3.micro para brokers RabbitMQ nuevos. Cotizar mq.m7g.medium de un nodo para evaluación antes de elegir clase. Completar la cotización con RDS PostgreSQL Single-AZ db.t4g.micro y 20 GiB gp3, ECR, Lambda, CloudWatch, Secrets Manager, S3, DNS, transferencia entre AZ y endpoints si se usan. Esas partidas no cuentan en el subtotal. Si el broker supera el presupuesto de desarrollo, mantener el flujo asíncrono de desarrollo en Compose y usar AWS para ventanas de integración presupuestadas.
-
-Para mayor disponibilidad, distribuir al menos dos tareas de cada servicio entre zonas, evitar dependencia de un solo NAT, evaluar RDS Multi-AZ y pasar RabbitMQ a clúster. El MQ solo aumenta unos USD 402.17/mes en la comparación de tamaños iguales. Confirmar tasa regional, clase, motor, configuración y cargos en AWS Pricing Calculator antes del despliegue. [Tarifas de Fargate y ALB](https://docs.aws.amazon.com/solutions/latest/prebid-server-deployment-on-aws/cost1.html) · [VPC e IPv4](https://aws.amazon.com/vpc/pricing/) · [Tarifas de Amazon MQ](https://aws.amazon.com/amazon-mq/pricing/) · [Clases actuales de RabbitMQ](https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/rmq-broker-instance-types.html) · [Precios de RDS PostgreSQL](https://aws.amazon.com/rds/postgresql/pricing/).
+La estimación por servicio y los escenarios de hasta 10, 100, 500 y 1.000 usuarios concurrentes están en [`docs/COSTOS_CLOUD.md`](../docs/COSTOS_CLOUD.md). El costo depende de capacidad aprovisionada, horas encendidas, concurrencia y tráfico, y debe recalcularse para la región y variables del entorno en AWS Pricing Calculator.
 
 Antes de la fase 2, confirmar cuenta de desarrollo y estado ECR previo, presupuesto, región, CIDR, dominio/certificado y si dev necesita Amazon MQ permanente. Antes de habilitar el flujo de notificaciones, acordar los permisos de RabbitMQ, manejo de eventos perdidos y responsabilidades de migración. Las fases posteriores requieren verificación y autorización de cambios en AWS.

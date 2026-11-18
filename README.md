@@ -15,6 +15,7 @@ Abre `http://localhost:8000` para usar la aplicación web. Swagger queda disponi
 - Arquitectura y diagramas editables: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 - Prueba de carga local: [`tests/load/README.md`](tests/load/README.md).
 - Publicación y organización en GitHub: [`docs/GITHUB_REPOSITORY.md`](docs/GITHUB_REPOSITORY.md).
+- Estimación mensual de AWS por servicio y escenarios de uso: [`docs/COSTOS_CLOUD.md`](docs/COSTOS_CLOUD.md).
 - Reglas de colaboración: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Base oficial del proyecto
